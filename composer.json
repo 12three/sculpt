@@ -1,0 +1,19 @@
+{
+    "name": "andrey/sculpt",
+    "autoload": {
+        "psr-4": {
+            "Andrey\\Sculpt\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andrey Zakharenko",
+            "email": "zakharenko.main@gmail.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "4.*",
+        "mongodb/mongodb": "^1.13",
+        "slim/psr7": "^1.6"
+    }
+}
