@@ -3,7 +3,6 @@ import {
   Box,
   Container,
   useDisclosure,
-  Button,
   Table,
   Thead,
   Tbody,
@@ -15,17 +14,30 @@ import {
   Center,
   Spinner,
   Flex,
+  Button,
 } from '@chakra-ui/react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBlocks } from '../../api';
 import { CreateNewBlockModal } from './components/CreateNewBlockModal';
 
 export const BlocksPage = () => {
+  const queryClient = useQueryClient();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isLoading, data } = useQuery({
     queryKey: ['blocks'],
     queryFn: getBlocks,
     networkMode: 'always',
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (id) => {
+      return fetch(`/api/blocks/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+    },
   });
 
   return (
@@ -54,6 +66,7 @@ export const BlocksPage = () => {
                   <Tr>
                     <Th>Name</Th>
                     <Th>Description</Th>
+                    <Th></Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -61,6 +74,17 @@ export const BlocksPage = () => {
                     <Tr key={block._id}>
                       <Td>{block.name}</Td>
                       <Td>{block.description}</Td>
+                      <Td>
+                        <Flex justifyContent="end">
+                          <Button
+                            variant="outline"
+                            colorScheme="red"
+                            onClick={() => mutation.mutate(block._id)}
+                          >
+                            Delete
+                          </Button>
+                        </Flex>
+                      </Td>
                     </Tr>
                   ))}
                 </Tbody>

@@ -12,25 +12,39 @@ import {
   Input,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const CreateNewBlockModal = (props: {
   isOpen: boolean;
   onClose: () => void;
 }) => {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<{ name: string; description: string }>();
+  const mutation = useMutation({
+    mutationKey: ['blocks'],
+    mutationFn: async (payload: { name: string; description: string }) => {
+      return fetch('api/blocks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+    },
+  });
 
   const handleSave = (payload: { name: string; description: string }) => {
-    fetch('api/blocks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    mutation.mutate(payload);
+    props.onClose();
+    reset();
   };
 
   return (
